@@ -228,7 +228,7 @@ import {
   LambdaIntegration,
   RestApiProps,
 } from 'aws-cdk-lib/aws-apigateway';
-import { Aspects, Duration } from 'aws-cdk-lib';
+import { Aspects, Duration, Stack, Token, TokenComparison } from 'aws-cdk-lib';
 import {
   PolicyDocument,
   PolicyStatement,
@@ -411,20 +411,31 @@ export class TestApi<
     // Here we grant grantee permission to call the api.
     // Machine to machine fine-grained access can be defined here using more specific principals (eg roles or
     // users) and resources (eg which api paths may be invoked by which principal) if required.
-    this.api.addToResourcePolicy(
-      new PolicyStatement({
-        effect: Effect.ALLOW,
-        principals: [grantee.grantPrincipal],
-        actions: ['execute-api:Invoke'],
-        resources: ['execute-api:/*'],
-      }),
-    );
-
     Grant.addToPrincipal({
       grantee,
       actions: ['execute-api:Invoke'],
       resourceArns: [this.api.arnForExecuteApi('*', '/*', '*')],
     });
+
+    // The principal's own policy is enough within this account, as CDK's grants assume for
+    // two unresolved accounts. A principal in another account also needs the resource policy.
+    const { principalAccount } = grantee.grantPrincipal;
+    const accounts = principalAccount
+      ? Token.compareStrings(principalAccount, Stack.of(this).account)
+      : undefined;
+    if (
+      accounts !== TokenComparison.SAME &&
+      accounts !== TokenComparison.BOTH_UNRESOLVED
+    ) {
+      this.api.addToResourcePolicy(
+        new PolicyStatement({
+          effect: Effect.ALLOW,
+          principals: [grantee.grantPrincipal],
+          actions: ['execute-api:Invoke'],
+          resources: ['execute-api:/*'],
+        }),
+      );
+    }
   }
 }
 "
