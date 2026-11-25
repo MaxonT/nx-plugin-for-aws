@@ -320,16 +320,40 @@ export class UserIdentity extends Construct {
       managedLoginVersion: ManagedLoginVersion.NEWER_MANAGED_LOGIN,
     });
 
+  private readonly additionalCallbackUrls: string[] = [];
+
+  /**
+   * Permits the web client's sign-in and sign-out to redirect to the given URL,
+   * in addition to the local dev servers and any CloudFront distributions in the stack.
+   *
+   * @param url - The full URL the app redirects to, such as a website served from a custom domain
+   */
+  public addCallbackUrl(url: string) {
+    this.additionalCallbackUrls.push(url);
+  }
+
   private createUserPoolClient = (userPool: UserPool) => {
     const lazilyComputedCallbackUrls = Lazy.list({
       produce: () =>
-        LOCAL_CALLBACK_URLS.concat(
-          Stack.of(this)
-            .node.findAll()
-            .filter((child): child is Distribution => child instanceof Distribution)
-            .flatMap(findCloudFrontDomainNames)
-            .map((domain) => `https://${domain}`)
-        ),
+        [
+          ...new Set(
+            LOCAL_CALLBACK_URLS.concat(this.additionalCallbackUrls)
+              .concat(
+                Stack.of(this)
+                  .node.findAll()
+                  .filter((child): child is Distribution => child instanceof Distribution)
+                  .flatMap(findCloudFrontDomainNames)
+                  .map((domain) => `https://${domain}`)
+              )
+              // Websites served other than by CloudFront, such as through an API
+              .concat(
+                Stack.of(this)
+                  .node.findAll()
+                  .flatMap((child) => (child as { signInCallbackUrls?: unknown }).signInCallbackUrls)
+                  .filter((url): url is string => typeof url === 'string')
+              ),
+          ),
+        ],
     });
 
     return userPool.addClient(WEB_CLIENT_ID, {
