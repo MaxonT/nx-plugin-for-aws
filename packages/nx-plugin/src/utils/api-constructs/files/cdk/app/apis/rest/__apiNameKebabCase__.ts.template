@@ -16,6 +16,7 @@ import { RuntimeConfig } from '../../core/runtime-config<% if (esm) { %>.js<% } 
 import {
   AuthorizationType,
   LambdaIntegration,
+  RestApiProps,
   <%_ if (['trpc', 'fastapi'].includes(backend.type)) { _%>
   ResponseTransferMode,
   <%_ } _%>
@@ -88,6 +89,17 @@ export interface <%= apiNameClassName %>Props<
    * @default true
    */
   enableWaf?: boolean;
+  /**
+   * The API's endpoint type, for example PRIVATE with the VPC endpoints that may reach it.
+   *
+   * @default a regional endpoint
+   */
+  endpointConfiguration?: RestApiProps['endpointConfiguration'];
+  /**
+   * A resource policy that replaces the default one, for example to admit only calls
+   * through a VPC endpoint.
+   */
+  policy?: RestApiProps['policy'];
 }
 
 /**

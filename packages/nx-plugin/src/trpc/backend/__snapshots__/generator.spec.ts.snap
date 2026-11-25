@@ -366,6 +366,7 @@ import { RuntimeConfig } from '../../core/runtime-config.js';
 import {
   AuthorizationType,
   LambdaIntegration,
+  RestApiProps,
   ResponseTransferMode,
   CognitoUserPoolsAuthorizer,
 } from 'aws-cdk-lib/aws-apigateway';
@@ -414,6 +415,17 @@ export interface TestApiProps<
    * @default true
    */
   enableWaf?: boolean;
+  /**
+   * The API's endpoint type, for example PRIVATE with the VPC endpoints that may reach it.
+   *
+   * @default a regional endpoint
+   */
+  endpointConfiguration?: RestApiProps['endpointConfiguration'];
+  /**
+   * A resource policy that replaces the default one, for example to admit only calls
+   * through a VPC endpoint.
+   */
+  policy?: RestApiProps['policy'];
 }
 
 /**
@@ -801,6 +813,7 @@ import { RuntimeConfig } from '../../core/runtime-config.js';
 import {
   AuthorizationType,
   LambdaIntegration,
+  RestApiProps,
   ResponseTransferMode,
   TokenAuthorizer,
 } from 'aws-cdk-lib/aws-apigateway';
@@ -842,6 +855,17 @@ export interface TestApiProps<
    * @default true
    */
   enableWaf?: boolean;
+  /**
+   * The API's endpoint type, for example PRIVATE with the VPC endpoints that may reach it.
+   *
+   * @default a regional endpoint
+   */
+  endpointConfiguration?: RestApiProps['endpointConfiguration'];
+  /**
+   * A resource policy that replaces the default one, for example to admit only calls
+   * through a VPC endpoint.
+   */
+  policy?: RestApiProps['policy'];
 }
 
 /**
@@ -2483,6 +2507,7 @@ import { RuntimeConfig } from '../../core/runtime-config.js';
 import {
   AuthorizationType,
   LambdaIntegration,
+  RestApiProps,
   ResponseTransferMode,
 } from 'aws-cdk-lib/aws-apigateway';
 import { Aspects, Duration } from 'aws-cdk-lib';
@@ -2525,6 +2550,17 @@ export interface TestApiProps<
    * @default true
    */
   enableWaf?: boolean;
+  /**
+   * The API's endpoint type, for example PRIVATE with the VPC endpoints that may reach it.
+   *
+   * @default a regional endpoint
+   */
+  endpointConfiguration?: RestApiProps['endpointConfiguration'];
+  /**
+   * A resource policy that replaces the default one, for example to admit only calls
+   * through a VPC endpoint.
+   */
+  policy?: RestApiProps['policy'];
 }
 
 /**
